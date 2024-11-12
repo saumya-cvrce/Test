@@ -5,7 +5,8 @@
   <<GitHub link>>
   https://github.com/saumya-cvrce/Test/tree/master/accountservice
 
-- The applications can be executed by double clicking the "Startscript.bat" file located under
+- Download the executables folder to the local system.
+- The applications can be executed by double clicking the "Startscript.bat" file located inside executables folder location.
 
 - The application can be accessed by logging into the below url
   http://localhost:7070
