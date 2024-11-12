@@ -5,10 +5,27 @@
   <<GitHub link>>
   https://github.com/saumya-cvrce/Test/tree/master/accountservice
 
+The application can be built locally by downloading the source code as maven project and executing follwoing mvn command at project root folder.
+    In windows command prompt run the below command
+    mvn clean package
+
+It will create the jar files in respective project which can be invoked by following commands in command prompt.
+java -jar transactionservice-0.0.1-SNAPSHOT.jar
+java -jar accountservice-0.0.1-SNAPSHOT.jar
+
+
+Due to GitHub file size limitation not able to upload the executables.
+================================================================================================================
 - The applications can be executed by following the below process.
   1- Download the "executable" folder to local machine
   2- execute the Startscript.bat file by double clicking it which would run both account and transaction service.
+=================================================================================================================
 
+
+
+==========================
+Accessing the Application
+==========================
 - The application can be accessed by logging into the below url
   http://localhost:7070
 
