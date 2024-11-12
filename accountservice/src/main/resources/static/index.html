@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Management</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        h2 {
+            color: #333;
+        }
+        form {
+            margin-bottom: 20px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        label, input, button {
+            display: block;
+            margin: 10px 0;
+        }
+		.error-message{
+		            color: red;
+		        }
+		.success-message{
+					color: green;
+		}
+		.#customerId {
+		        width: 50px;
+		}
+		.#initialCredit {
+		        width: 50px;
+		}	
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Create Account</h2>
+    <form id="createAccountForm">
+        <label for="customerId">Customer ID: <span style="color: red;">*</span></label>
+        <input type="text" id="customerId" required placeholder="Existing customer - customer123" style="width: 300px;">
+        
+        <label for="initialCredit">Initial Credit:</label>
+        <input type="number" id="initialCredit" required min="0" step="0.01" style="width: 300px;" oninput="restrictNegativeValue(this)">
+        
+        <button type="button" onclick="createAccount()">Create Account</button>
+        <p id="createAccountMessage"></p>
+    </form>
+
+    <h2>Get Account Information</h2>
+    <form id="getUserInfoForm">
+        <label for="getCustomerId">Customer ID: <span style="color: red;">*</span></label>
+        <input type="text" id="customerId1" required>
+        
+        <button type="button" onclick="getUserInfo()">Get Account Info</button>
+		<p id="getAccountMessage"></p>
+    </form>
+
+    <div id="userInfo"></div>
+</div>
+
+<script>
+	
+function restrictNegativeValue(initialCredit) {
+    if (initialCredit.value < 0) {
+	      initialCredit.value = '0';  // Reset initial credit to Zero
+    }
+}
+	
+
+const BASE_URL = "http://localhost:8080";
+
+// Function to create an account
+async function createAccount() {
+    const customerId = document.getElementById("customerId").value;
+    const initialCredit = parseFloat(document.getElementById("initialCredit").value);
+	const createAccountMessage = document.getElementById("createAccountMessage");
+	createAccountMessage.classList.remove("error-message", "success-message");
+	
+	if (!customerId) {
+			createAccountMessage.classList.add("error-message");
+			createAccountMessage.textContent = "Customer ID is required, Please enter";
+	        return;
+	}
+
+    const response = await fetch(`${BASE_URL}/api/customer/openAccount`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ customerId, initialCredit })
+    });
+
+    const result = await response.json();
+	
+	const accountId = result.accountID;
+	// Display the result message
+	
+	
+    createAccountMessage.textContent = response.ok 
+        ? "Account successfully created! New account ID: " +accountId 
+        : "Failed to create account: " + result.message;
+		
+	if (response.ok) {
+		createAccountMessage.classList.add("success-message");
+	} else	{
+		createAccountMessage.classList.add("error-message");
+	}	
+}
+
+// Function to get user information
+async function getUserInfo() {
+    const customerId1 = document.getElementById("customerId1").value;
+	
+	const getAccountMessage = document.getElementById("getAccountMessage");
+	getAccountMessage.classList.remove("error-message", "success-message");
+		
+	if (!customerId1) {
+		getAccountMessage.classList.add("error-message");
+		getAccountMessage.textContent = "Customer ID is required, Please enter";
+	    return;
+	} else
+	{
+		getAccountMessage.textContent = "";
+	}
+
+	const response = await fetch(`${BASE_URL}/api/customer/fetchAccount?customerId=${customerId1}`, {
+	    method: 'GET'
+	});
+    const result = await response.json();
+
+    const userInfoDiv = document.getElementById("userInfo");
+
+	if (response.ok) {
+	    userInfoDiv.innerHTML = `
+	        <h3>User Information</h3>
+	        <p><strong>Name:</strong> ${result.firstName}</p>
+	        <p><strong>Surname:</strong> ${result.lastName}</p>
+	        <h4>Accounts:</h4>
+	    `;
+
+	    // Loop through accounts and display balance and transactions
+	    result.account.forEach(account => {
+	        userInfoDiv.innerHTML += `
+	            <div>
+	                <p><strong>Account ID:</strong> ${account.accountID}</p>
+	                <p><strong>Balance:</strong> $${account.balance}</p>
+	                <h5>Transactions:</h5>
+	                <ul>
+	                    ${
+	                        account.transactionDTO && account.transactionDTO.length > 0
+	                            ? account.transactionDTO.map(t => `
+	                                <li>
+	                                    <strong>Transaction ID:</strong> ${t.transactionId}, 
+	                                    <strong>Amount:</strong> $${t.amount}, 
+	                                    <strong>Date:</strong> ${t.transactionDate}
+	                                </li>
+	                              `).join('')
+	                            : `<li>No transactions available.</li>`
+	                    }
+	                </ul>
+	            </div>
+	        `;
+	    });
+	} else {
+		userInfoDiv.innerHTML = `<p class="error-message">Failed to retrieve user info: ${result.message || "Unknown error"}</p>`;
+
+	}
+	}
+
+</script>
+
+</body>
+</html>
